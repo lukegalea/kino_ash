@@ -48,9 +48,11 @@ record data, because kino assets are served unauthenticated.
 
 ## Dependencies
 
-The demo slice depends on `ash_a2ui` via a **path dependency**
-(`../ash_a2ui`) so `KinoAsh.render/2` can resolve surfaces directly.
-Repo integration or a hex release replaces this later.
+`ash_a2ui` comes in as a git dependency pinned to the exact tree the
+vendored hook and committed bundle were verified against. Bump the ref
+deliberately — and re-vendor `assets/a2ui_surface/vendor/` from
+ash_a2ui's `priv/js` when you do, so the server encoder and client hook
+stay a matched pair.
 
 ## Rebuilding the JS bundle
 
@@ -67,13 +69,10 @@ The output is committed; consumers never need node.
 ```sh
 docker run --rm --network host -u $(id -u):$(id -g) -e HOME=/tmp \
   -e MIX_HOME=/m -v mixhome:/m -v hexcache:/tmp/.cache \
-  -v ~/ast-forks/kino_ash:/w -v ~/ast-forks/ash_a2ui:/ash_a2ui \
+  -v ~/ast-forks/kino_ash:/w \
   -w /w elixir:1.18.4-otp-27 \
   bash -c 'set -o pipefail; MIX_ENV=test mix deps.get && MIX_ENV=test mix test'
 ```
-
-(The `ash_a2ui` mount makes the `../ash_a2ui` path dependency resolvable
-inside the container.)
 
 `test/kino_ash_test.exs` exercises the full render path (resource ->
 encoder -> kino struct -> digest) with a minimal ETS-backed fixture

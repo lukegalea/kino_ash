@@ -30,9 +30,11 @@ defmodule KinoAsh.MixProject do
   defp deps do
     [
       {:kino, "~> 0.19"},
-      # Demo-slice wiring: resolve surfaces directly through ash_a2ui's
-      # encoder. Repo integration (or a hex release) replaces the path dep.
-      {:ash_a2ui, path: "../ash_a2ui"}
+      # Surfaces resolve directly through ash_a2ui's encoder. Pinned to the
+      # exact tree the bundle was vendored and verified against — bump
+      # deliberately, re-vendoring assets/vendor when you do.
+      {:ash_a2ui,
+       github: "lukegalea/ash_a2ui", ref: "83049cf5d8f8decef17db7372762e327e8da9849"}
     ]
   end
 
