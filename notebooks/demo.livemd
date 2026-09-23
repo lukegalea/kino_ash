@@ -57,6 +57,11 @@ defmodule Demo.Minimal do
     component :table do
       fields [:name]
     end
+
+    component :form do
+      fields [:name]
+      create_action :create
+    end
   end
 end
 ```

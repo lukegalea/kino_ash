@@ -52,8 +52,12 @@ record data, because kino assets are served unauthenticated.
 (docker, playwright-driven) on every slice: all six cells evaluate, and
 the render cell's output is a hydrated A2UI surface — the
 `data-a2ui-hydrated` marker set (pierce the shadow DOM to see it), the
-seeded records visible as rows with controls, no `[object Object]`
-anywhere, zero console errors.
+seeded records visible as rows with View/Edit controls plus the create
+affordance, no `[object Object]` anywhere, zero console errors. The demo
+surface declares a table *and* a form component: since the ash_a2ui
+interaction-model change, row View/Edit affordances are emitted only
+when a form target exists, so a table-only surface would render rows
+without controls.
 
 ![kino_ash demo rendering in Livebook](notebooks/demo-livebook.png)
 
