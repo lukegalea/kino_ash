@@ -8,5 +8,6 @@ defmodule KinoAsh.Test.Domain do
 
   resources do
     resource KinoAsh.Test.Minimal
+    resource KinoAsh.Test.Guarded
   end
 end

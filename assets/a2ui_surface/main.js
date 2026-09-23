@@ -1,5 +1,5 @@
 /**
- * KinoAsh.Surface client entrypoint — `init(ctx, messages)`.
+ * KinoAsh.Surface client entrypoint — `init(ctx, data)`.
  *
  * Proven shape (S2 spike, GO verdict): this is the spike's boot path moved
  * into a Kino.JS asset. The bundle imports `@a2ui/lit/v0_9` (registers
@@ -7,6 +7,12 @@
  * dependency-free ash_a2ui hook via `configureAshA2ui`, then drives the
  * hook's mounted()/handleEvent contract with a LiveView-shaped host object
  * and feeds the encoded server->client messages passed from Elixir.
+ *
+ * `data` is either a bare server->client message list (static kino) or
+ * `%{messages: [...], interactive: true}` (KinoAsh.Interactive). In live
+ * mode the host additionally forwards hook pushes over `ctx.pushEvent`
+ * (the server runs them through AshA2ui.ActionHandler) and refreshes the
+ * surface from `a2ui:messages` broadcasts.
  */
 
 import {MessageProcessor} from "@a2ui/web_core/v0_9";
@@ -15,6 +21,15 @@ import "./vendor/ash_a2ui_theme.css";
 import "./card.css";
 import {AshA2ui, configureAshA2ui} from "./vendor/ash_a2ui_hook.js";
 
+function isLivePayload(data) {
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    Array.isArray(data.messages)
+  );
+}
+
 /**
  * Minimal LiveView-shaped host: the glue Phoenix normally provides. The
  * hook object itself is the prototype (exactly how LiveView resolves the
@@ -22,17 +37,20 @@ import {AshA2ui, configureAshA2ui} from "./vendor/ash_a2ui_hook.js";
  * supplies `el`, `handleEvent`, and `pushEvent`.
  */
 class HookHost {
-  constructor(el) {
+  constructor(el, forwardPush) {
     this.el = el;
     this.events = {};
     this.pushed = [];
     this.handleEvent = (name, cb) => {
       this.events[name] = cb;
     };
-    // Static kino: no server roundtrip. Actions are recorded for debugging
-    // (and a future Kino.JS.Live tier) instead of pushed.
+    // Static kino: no server roundtrip, actions are recorded only. The
+    // live kino passes forwardPush and every hook push rides ctx.pushEvent
+    // to the Kino.JS.Live server.
+    this.forwardPush = forwardPush || null;
     this.pushEvent = (name, payload) => {
       this.pushed.push({name, payload});
+      if (this.forwardPush) this.forwardPush(name, payload);
     };
   }
 
@@ -77,7 +95,10 @@ async function waitHydrated(container) {
   return null;
 }
 
-export async function init(ctx, messages) {
+export async function init(ctx, data) {
+  const live = isLivePayload(data);
+  const messages = live ? data.messages : data;
+
   await ctx.importCSS("main.css");
   // Notebook-flavored face for the card; degrades to system-ui offline.
   ctx.importCSS(
@@ -93,7 +114,21 @@ export async function init(ctx, messages) {
 
   configureAshA2ui({MessageProcessor, catalogs: [basicCatalog]});
 
-  const hook = new HookHost(host);
+  const hook = new HookHost(
+    host,
+    live ? (name, payload) => ctx.pushEvent(name, payload) : null,
+  );
+
+  // Live kino: follow-up messages from the server (ActionHandler results)
+  // arrive as a2ui:messages broadcasts and patch the mounted surface.
+  if (live) {
+    ctx.handleEvent("a2ui:messages", (payload) => {
+      const incoming =
+        payload && Array.isArray(payload.messages) ? payload.messages : payload;
+      if (Array.isArray(incoming) && incoming.length > 0) hook.receive(incoming);
+    });
+  }
+
   AshA2ui.mounted.call(hook);
   hook.receive(Array.isArray(messages) ? messages : []);
 
@@ -104,6 +139,8 @@ export async function init(ctx, messages) {
     hydrated: Boolean(surface),
     controlsDeep: countControls(host),
     hasObjectObject: host.textContent.includes("[object Object]"),
+    live,
+    pushed: hook.pushed.length,
   };
   ctx.root.setAttribute("data-a2ui-hydrated", String(result.hydrated));
   window.__KINO_A2UI_RESULT__ = result;

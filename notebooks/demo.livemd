@@ -86,6 +86,22 @@ spec digest — surface id, version, component count — never record data.
 KinoAsh.render(Demo.Minimal)
 ```
 
+## Render the surface — interactive
+
+`live: true` starts the `Kino.JS.Live` kino: surface actions round-trip
+through `AshA2ui.ActionHandler` and re-render the same mounted surface —
+Create and Edit genuinely write through Ash. Interactive kinos default
+`authorize?: false` (pass `authorize?: true` with an `actor:` to enforce
+policies).
+
+```elixir
+KinoAsh.render(Demo.Minimal, live: true, authorize?: false)
+```
+
+Click **Create Minimal**, fill in a name, submit — a new row appears.
+**Edit** a row, change the name, submit — the row updates. Both run the
+demo resource's Ash actions server-side.
+
 ## Alternates
 
 Pre-encoded messages (no Ash at the call site):
