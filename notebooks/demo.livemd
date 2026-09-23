@@ -40,7 +40,10 @@ defmodule Demo.Minimal do
     extensions: [AshA2ui]
 
   ets do
-    private? true
+    # Must be shared: the interactive kino's actions run in the kino's
+    # server process, so a private table would hide the seed rows from the
+    # action refreshes (and its writes from other cells).
+    private? false
   end
 
   attributes do

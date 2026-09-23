@@ -50,7 +50,15 @@ class HookHost {
     this.forwardPush = forwardPush || null;
     this.pushEvent = (name, payload) => {
       this.pushed.push({name, payload});
-      if (this.forwardPush) this.forwardPush(name, payload);
+      if (this.forwardPush) {
+        window.__KINO_A2UI_DEBUG__.pushed++;
+        window.__KINO_A2UI_DEBUG__.lastPush = {name, payload};
+        try {
+          this.forwardPush(name, payload);
+        } catch (e) {
+          window.__KINO_A2UI_DEBUG__.pushErrors.push(String(e).slice(0, 120));
+        }
+      }
     };
   }
 
@@ -121,8 +129,11 @@ export async function init(ctx, data) {
 
   // Live kino: follow-up messages from the server (ActionHandler results)
   // arrive as a2ui:messages broadcasts and patch the mounted surface.
+  window.__KINO_A2UI_DEBUG__ = {pushed: 0, received: 0, pushErrors: [], lastPush: null, lastReceived: null};
   if (live) {
     ctx.handleEvent("a2ui:messages", (payload) => {
+      window.__KINO_A2UI_DEBUG__.received++;
+      window.__KINO_A2UI_DEBUG__.lastReceived = payload;
       const incoming =
         payload && Array.isArray(payload.messages) ? payload.messages : payload;
       if (Array.isArray(incoming) && incoming.length > 0) hook.receive(incoming);
