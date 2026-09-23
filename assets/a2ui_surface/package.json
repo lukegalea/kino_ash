@@ -1,0 +1,18 @@
+{
+  "name": "kino_ash_a2ui_surface",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kino.JS asset bundle for KinoAsh.Surface: @a2ui/lit renderer + vendored ash_a2ui hook inside a notebook card",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild main.js --bundle --format=esm --outfile=../../lib/assets/a2ui_surface/build/main.js --log-level=info"
+  },
+  "dependencies": {
+    "@a2ui/lit": "^0.11.0",
+    "@a2ui/web_core": "^0.11.0",
+    "lit": "^3.3.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

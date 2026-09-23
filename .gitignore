@@ -1,0 +1,13 @@
+# Build artifacts
+/_build/
+/deps/
+
+# NPM
+/assets/a2ui_surface/node_modules/
+
+# Editor
+/.elixir_ls/
+/.dialyzer/
+
+# NOTE: lib/assets/a2ui_surface/build/ is the COMMITTED esbuild output
+# (kino convention) — it is intentionally not ignored.

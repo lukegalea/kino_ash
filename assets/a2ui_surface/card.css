@@ -1,0 +1,19 @@
+/*
+ * The notebook-flavored card hosting the surface: 2px ink border, hard
+ * shadow, DM Sans with system fallback. Surface internals are styled by
+ * the vendored ash_a2ui theme (--a2ui-* custom properties).
+ */
+.kino-ash-card {
+  box-sizing: border-box;
+  max-width: 42rem;
+  padding: 1rem;
+  background: var(--a2ui-color-surface, #ffffff);
+  border: 2px solid #1f2430;
+  border-radius: 0.75rem;
+  box-shadow: 4px 4px 0 #1f2430;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.kino-ash-card__surface {
+  min-height: 1rem;
+}

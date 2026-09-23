@@ -1,0 +1,93 @@
+# kino_ash demo — render an Ash surface
+
+A minimal Livebook demo: define a test-style Ash resource with an `a2ui`
+block, seed a couple of records, and render the surface with
+`KinoAsh.render/2`.
+
+## Dependency setup
+
+Uses the local `kino_ash` checkout (which in turn path-depends on
+`../ash_a2ui`). If you opened this notebook from elsewhere, replace the
+path with the absolute path to your kino_ash clone.
+
+```elixir
+Mix.install([
+  {:kino_ash, path: Path.expand(__DIR__ <> "/..")}
+])
+```
+
+## Define the demo resource
+
+The smallest possible surface: one table of names.
+
+```elixir
+defmodule Demo.Domain do
+  use Ash.Domain, validate_config_inclusion?: false
+
+  resources do
+    resource Demo.Minimal
+  end
+end
+
+defmodule Demo.Minimal do
+  use Ash.Resource,
+    domain: Demo.Domain,
+    data_layer: Ash.DataLayer.Ets,
+    extensions: [AshA2ui]
+
+  ets do
+    private? true
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :name, :string, public?: true
+  end
+
+  actions do
+    defaults [:read, :destroy, create: :*, update: :*]
+  end
+
+  a2ui do
+    component :table do
+      fields [:name]
+    end
+  end
+end
+```
+
+## Seed some records
+
+```elixir
+{:ok, _} = Ash.create(Demo.Minimal, %{name: "Ada Lovelace"})
+{:ok, _} = Ash.create(Demo.Minimal, %{name: "Grace Hopper"})
+{:ok, _} = Ash.create(Demo.Minimal, %{name: "Alan Turing"})
+:ok
+```
+
+## Render the surface
+
+The output is a static kino hosting a real `<a2ui-surface>` (the
+`@a2ui/lit` web components), hydrated from the encoded messages
+`AshA2ui.Info.build_surface/2` produced. Saving the notebook persists a
+spec digest — surface id, version, component count — never record data.
+
+```elixir
+KinoAsh.render(Demo.Minimal)
+```
+
+## Alternates
+
+Pre-encoded messages (no Ash at the call site):
+
+```elixir
+messages = AshA2ui.Info.build_surface(Demo.Minimal)
+KinoAsh.Surface.new(messages)
+```
+
+A builder MFA:
+
+```elixir
+KinoAsh.Surface.new({AshA2ui.Info, :build_surface, [Demo.Minimal]})
+```
