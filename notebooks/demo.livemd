@@ -6,21 +6,25 @@ block, seed a couple of records, and render the surface with
 
 ## Dependency setup
 
-Uses the local `kino_ash` checkout (which in turn path-depends on
-`../ash_a2ui`). If you opened this notebook from elsewhere, replace the
-path with the absolute path to your kino_ash clone.
+Installs `kino_ash` from GitHub. `ash_a2ui` comes in transitively, pinned
+inside the package to the exact tree the vendored client hook and
+committed bundle were verified against.
 
 ```elixir
 Mix.install([
-  {:kino_ash, path: Path.expand(__DIR__ <> "/..")}
+  {:kino_ash, github: "lukegalea/kino_ash"}
 ])
 ```
 
 ## Define the demo resource
 
-The smallest possible surface: one table of names.
+The smallest possible surface: one table of names. (Apps set Ash's
+string-length config in config.exs; a notebook sets it directly before
+defining resources.)
 
 ```elixir
+Application.put_env(:ash, :default_string_length_count, :codepoints)
+
 defmodule Demo.Domain do
   use Ash.Domain, validate_config_inclusion?: false
 

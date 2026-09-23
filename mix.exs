@@ -34,7 +34,7 @@ defmodule KinoAsh.MixProject do
       # exact tree the bundle was vendored and verified against — bump
       # deliberately, re-vendoring assets/vendor when you do.
       {:ash_a2ui,
-       github: "lukegalea/ash_a2ui", ref: "83049cf5d8f8decef17db7372762e327e8da9849"}
+       github: "lukegalea/ash_a2ui", ref: "1d0f6febcab4dc9ab0cf43f7b1cf4e8b2271e9ea"}
     ]
   end
 

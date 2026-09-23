@@ -46,6 +46,23 @@ KinoAsh.render(MyApp.Support.Ticket, export: false)
 catalog id, protocol version, component count, message kinds — never
 record data, because kino assets are served unauthenticated.
 
+## Verified in a real Livebook
+
+`notebooks/demo.livemd` is executed headlessly in a real Livebook
+(docker, playwright-driven) on every slice: all six cells evaluate, and
+the render cell's output is a hydrated A2UI surface — the
+`data-a2ui-hydrated` marker set (pierce the shadow DOM to see it), the
+seeded records visible as rows with controls, no `[object Object]`
+anywhere, zero console errors.
+
+![kino_ash demo rendering in Livebook](notebooks/demo-livebook.png)
+
+Two notebook-vs-package notes the real run surfaced (both fixed in the
+demo): notebooks have no `config/config.exs`, so the demo sets Ash's
+`default_string_length_count` itself before defining the resource; and
+the demo depends on `kino_ash` from GitHub, matching what a public
+consumer runs.
+
 ## Dependencies
 
 `ash_a2ui` comes in as a git dependency pinned to the exact tree the
