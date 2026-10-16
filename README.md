@@ -70,7 +70,7 @@ initial read and every dispatched action, and `:authorize?` defaults to
 with an `actor:` to enforce policies on the read and on every action —
 the server is the authority regardless of what the client renders:
 non-allowlisted or policy-blocked actions are rejected with a
-`/ui/status` error before touching Ash.
+`/ui/feedback` error before touching Ash.
 
 Exported interactive kinos persist their digest under the distinct
 `a2ui_surface_live` info string with `"interactive" => true`, so a saved

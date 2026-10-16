@@ -12,8 +12,8 @@ defmodule KinoAsh.Interactive do
   back to every connected client as `a2ui:messages` — the same vendored
   hook consumes them and the mounted surface re-renders. Submits create
   and update real records; validation errors land on `/errors/<field>`,
-  successes on `/ui/status` (plus typed `/ui/feedback` under experience
-  v2).
+  every outcome on the typed `/ui/feedback` (`%{"kind" => "success" |
+  "warning" | "error", "message" => text}`).
 
   ## The actor contract
 
@@ -25,7 +25,7 @@ defmodule KinoAsh.Interactive do
   read and on every action the surface dispatches. The rendered affordances
   still come from the encoder; the server is the authority regardless of
   what the client shows (spoofed or non-allowlisted actions are rejected
-  with a `/ui/status` error before touching Ash).
+  with an `/ui/feedback` error before touching Ash).
 
   ## Export
 
@@ -120,7 +120,7 @@ defmodule KinoAsh.Interactive do
   end
 
   # Both action outcomes broadcast: `{:ok, followups}` patches records and
-  # status; `{:error, followups}` carries the /errors and /ui/status writes
+  # status; `{:error, followups}` carries the /errors and /ui/feedback writes
   # the client renders. A non-list result (ActionHandler contract violation)
   # is swallowed rather than crashing the kino server.
   defp broadcast_followups({tag, followups}, ctx) when tag in [:ok, :error] and is_list(followups) do
