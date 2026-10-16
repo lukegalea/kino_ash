@@ -92,8 +92,16 @@ defmodule KinoAsh.InteractiveTest do
                       {:event, "a2ui:messages", followups, _meta}},
                      500
 
-      assert [%{"updateDataModel" => %{"path" => "/ui/status", "value" => status}}] = followups
-      assert status =~ "Unknown action"
+      assert [
+               %{
+                 "updateDataModel" => %{
+                   "path" => "/ui/feedback",
+                   "value" => %{"kind" => "error", "message" => message}
+                 }
+               }
+             ] = followups
+
+      assert message =~ "Unknown action"
 
       assert Ash.read!(Minimal) == []
     end
@@ -112,8 +120,13 @@ defmodule KinoAsh.InteractiveTest do
                KinoAsh.Interactive.handle_action(Minimal, @action_envelope, authorize?: false)
 
       assert Enum.any?(followups, fn
-               %{"updateDataModel" => %{"path" => "/ui/status", "value" => value}} ->
-                 value =~ "Created"
+               %{
+                 "updateDataModel" => %{
+                   "path" => "/ui/feedback",
+                   "value" => %{"kind" => "success", "message" => message}
+                 }
+               } ->
+                 message =~ "Created"
 
                _other ->
                  false
@@ -143,13 +156,18 @@ defmodule KinoAsh.InteractiveTest do
              end)
     end
 
-    test "authorize?: true enforces policies and reports forbidden via /ui/status" do
+    test "authorize?: true enforces policies and reports forbidden via /ui/feedback" do
       assert {:error, messages} =
                KinoAsh.Interactive.handle_action(Guarded, @action_envelope, authorize?: true)
 
       assert Enum.any?(messages, fn
-               %{"updateDataModel" => %{"path" => "/ui/status", "value" => value}} ->
-                 value =~ "not authorized"
+               %{
+                 "updateDataModel" => %{
+                   "path" => "/ui/feedback",
+                   "value" => %{"kind" => "error", "message" => message}
+                 }
+               } ->
+                 message =~ "not authorized"
 
                _other ->
                  false
